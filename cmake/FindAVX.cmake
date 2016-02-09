@@ -18,12 +18,12 @@
 #   AVX_VERSION = the requested version, if EXACT is true, or
 #                 the highest AVX version found.
 #   AVX_FLAGS = compile flags for the version of AVX found
-# 
+#
 # If AVX is not supported on the host platform, these variables are
 # not set. If QUIET is true, the module does not print a message if
 # AVX if missing. If REQUIRED is true, the module produces a fatal
 # error if AVX support is missing.
-# 
+#
 set(AVX_FLAGS)
 set(AVX_FOUND)
 set(DETECTED_AVX_10)
@@ -54,7 +54,7 @@ else()
   endif()
   if(NOT AVX_FIND_VERSION VERSION_GREATER "1.0")
     set(_AVX_TEST_10 1)
-  endif()  
+  endif()
 endif()
 
 # Check for AVX2 support.
@@ -118,6 +118,18 @@ elseif(MSVC)
       set(AVX_STR "1_0")
       SET(AVX_FOUND 1)
   endif()
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+    if(DETECTED_AVX_20)
+        SET(AVX_FLAGS "${AVX_FLAGS} -xavx2")
+        set(AVX_VERSION "2.0")
+        set(AVX_STR "2_0")
+        SET(AVX_FOUND 1)
+    elseif(DETECTED_AVX_10)
+        SET(AVX_FLAGS "${AVX_FLAGS} -xavx")
+        set(AVX_VERSION "1.0")
+        set(AVX_STR "1_0")
+        SET(AVX_FOUND 1)
+    endif()
 endif()
 
 if(AVX_FOUND)

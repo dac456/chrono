@@ -22,12 +22,12 @@
 #   SSE_VERSION = the requested version, if EXACT is true, or
 #                 the highest SSE version found.
 #   SSE_FLAGS = compile flags for the version of SSE found
-# 
+#
 # If SSE is not supported on the host platform, these variables are
 # not set. If QUIET is true, the module does not print a message if
 # SSE if missing. If REQUIRED is true, the module produces a fatal
 # error if SSE support is missing.
-# 
+#
 set(SSE_FLAGS)
 set(SSE_FOUND)
 set(DETECTED_SSE_41)
@@ -76,7 +76,7 @@ else()
   endif()
   if(NOT SSE_FIND_VERSION VERSION_GREATER "1.0")
     set(_SSE_TEST_10 1)
-  endif()  
+  endif()
 endif()
 
 
@@ -102,7 +102,7 @@ if(_SSE_TEST_42)
       return 0;
     else
       return 1;
-  }" 
+  }"
   DETECTED_SSE_42)
 endif()
 
@@ -272,6 +272,37 @@ elseif(MSVC)
       set(SSE_STR "1_0")
       SET(SSE_FOUND 1)
   endif()
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+    if(DETECTED_SSE_42)
+        SET(SSE_FLAGS "${SSE_FLAGS} -xsse4.2 -mfpmath=sse")
+        set(SSE_VERSION "4.2")
+        set(SSE_STR "4_2")
+        SET(SSE_FOUND 1)
+    elseif(DETECTED_SSE_41)
+        SET(SSE_FLAGS "${SSE_FLAGS} -xsse4.1 -mfpmath=sse")
+        set(SSE_VERSION "4.1")
+        set(SSE_STR "4_1")
+        SET(SSE_FOUND 1)
+    elseif(DETECTED_SSE_30)
+        SET(SSE_FLAGS "${SSE_FLAGS} -xsse3 -mfpmath=sse")
+        set(SSE_VERSION "3.0")
+        set(SSE_STR "3_0")
+        SET(SSE_FOUND 1)
+    elseif(DETECTED_SSE_20)
+        SET(SSE_FLAGS "${SSE_FLAGS} -xsse2 -mfpmath=sse")
+        set(SSE_VERSION "2.0")
+        set(SSE_STR "2_0")
+        SET(SSE_FOUND 1)
+    elseif(DETECTED_SSE_10)
+        SET(SSE_FLAGS "${SSE_FLAGS} -xsse -mfpmath=sse")
+        set(SSE_VERSION "1.0")
+        set(SSE_STR "1_0")
+        SET(SSE_FOUND 1)
+    else()
+        # Setting -ffloat-store to alleviate 32bit vs 64bit discrepancies on non-SSE platforms.
+        #set(SSE_FLAGS "-ffloat-store")
+        message(STATUS "No SSE extensions found")
+    endif()
 endif()
 
 if(SSE_FOUND)
