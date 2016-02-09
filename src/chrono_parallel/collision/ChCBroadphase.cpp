@@ -94,7 +94,7 @@ inline void function_Count_AABB_AABB_Intersection(const uint index,
         continue;
       if (!overlap(Amin, Amax, Bmin, Bmax))
         continue;
-      
+
       count++;
     }
   }
@@ -197,8 +197,8 @@ void ChCBroadphase::DetectPossibleCollisions() {
   bbox_transformation unary_op;
   bbox_reduction binary_op;
   // Grow the initial bounding box to contain all of the aabbs
-  res = transform_reduce(thrust_parallel, aabb_min_rigid.begin(), aabb_min_rigid.end(), unary_op, res, binary_op);
-  res = transform_reduce(thrust_parallel, aabb_max_rigid.begin(), aabb_max_rigid.end(), unary_op, res, binary_op);
+  res = thrust::transform_reduce(thrust_parallel, aabb_min_rigid.begin(), aabb_min_rigid.end(), unary_op, res, binary_op);
+  res = thrust::transform_reduce(thrust_parallel, aabb_max_rigid.begin(), aabb_max_rigid.end(), unary_op, res, binary_op);
   min_bounding_point = res.first;
   max_bounding_point = res.second;
   global_origin = min_bounding_point;
@@ -211,8 +211,8 @@ void ChCBroadphase::DetectPossibleCollisions() {
   real3 inv_bin_size_vec = 1.0 / bin_size_vec;
 
   thrust::constant_iterator<real3> offset(global_origin);
-  transform(aabb_min_rigid.begin(), aabb_min_rigid.end(), offset, aabb_min_rigid.begin(), thrust::minus<real3>());
-  transform(aabb_max_rigid.begin(), aabb_max_rigid.end(), offset, aabb_max_rigid.begin(), thrust::minus<real3>());
+  thrust::transform(aabb_min_rigid.begin(), aabb_min_rigid.end(), offset, aabb_min_rigid.begin(), thrust::minus<real3>());
+  thrust::transform(aabb_max_rigid.begin(), aabb_max_rigid.end(), offset, aabb_max_rigid.begin(), thrust::minus<real3>());
 
   LOG(TRACE) << "Minimum bounding point: (" << res.first.x << ", " << res.first.y << ", " << res.first.z << ")";
   LOG(TRACE) << "Maximum bounding point: (" << res.second.x << ", " << res.second.y << ", " << res.second.z << ")";
@@ -265,17 +265,17 @@ void ChCBroadphase::DetectPossibleCollisions() {
 #pragma omp parallel for
   for (int i = 0; i < num_bins_active; i++) {
     function_Count_AABB_AABB_Intersection(
-      i, 
+      i,
       inv_bin_size_vec,
       bins_per_axis,
-      aabb_min_rigid, 
-      aabb_max_rigid, 
-      bin_number_out, 
-      aabb_number, 
+      aabb_min_rigid,
+      aabb_max_rigid,
+      bin_number_out,
+      aabb_number,
       bin_start_index,
-      fam_data, 
-      obj_active, 
-      obj_data_ID, 
+      fam_data,
+      obj_active,
+      obj_data_ID,
       num_contact);
   }
   Thrust_Exclusive_Scan(num_contact);
@@ -285,17 +285,17 @@ void ChCBroadphase::DetectPossibleCollisions() {
 
 #pragma omp parallel for
   for (int index = 0; index < num_bins_active; index++) {
-    function_Store_AABB_AABB_Intersection(index, 
+    function_Store_AABB_AABB_Intersection(index,
       inv_bin_size_vec,
       bins_per_axis,
-      aabb_min_rigid, 
-      aabb_max_rigid, 
-      bin_number_out, 
+      aabb_min_rigid,
+      aabb_max_rigid,
+      bin_number_out,
       aabb_number,
-      bin_start_index, 
-      num_contact, 
-      fam_data, 
-      obj_active, 
+      bin_start_index,
+      num_contact,
+      fam_data,
+      obj_active,
       obj_data_ID,
       contact_pairs);
   }
