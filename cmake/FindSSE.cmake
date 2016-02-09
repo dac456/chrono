@@ -84,6 +84,8 @@ endif()
 if(_SSE_TEST_42)
   if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_REQUIRED_FLAGS "-msse4.2")
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+    set(CMAKE_REQUIRED_FLAGS "-xsse4.2")
   endif()
   check_cxx_source_runs("
   #include <emmintrin.h>
