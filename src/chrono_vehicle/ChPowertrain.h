@@ -19,7 +19,6 @@
 #ifndef CH_POWERTRAIN_H
 #define CH_POWERTRAIN_H
 
-#include "chrono/core/ChShared.h"
 #include "chrono/core/ChVector.h"
 #include "chrono/physics/ChBody.h"
 
@@ -39,7 +38,7 @@ namespace vehicle {
 /// @{
 
 /// Base class for a powertrain system.
-class CH_VEHICLE_API ChPowertrain : public ChShared {
+class CH_VEHICLE_API ChPowertrain {
   public:
     /// Driving modes.
     enum DriveMode {
@@ -81,14 +80,14 @@ class CH_VEHICLE_API ChPowertrain : public ChShared {
     /// Set the mode of the transmission.
     virtual void SetDriveMode(DriveMode mmode) = 0;
 
-    /// Update the state of this powertrain system at the current time.
+    /// Synchronize the state of this powertrain system at the current time.
     /// The powertrain system is provided the current driver throttle input, a
     /// value in the range [0,1], and the current angular speed of the transmission
     /// shaft (from the driveline).
-    virtual void Update(double time,        ///< [in] current time
-                        double throttle,    ///< [in] current throttle input [0,1]
-                        double shaft_speed  ///< [in] current angular speed of the transmission shaft
-                        ) = 0;
+    virtual void Synchronize(double time,        ///< [in] current time
+                             double throttle,    ///< [in] current throttle input [0,1]
+                             double shaft_speed  ///< [in] current angular speed of the transmission shaft
+                             ) = 0;
 
     /// Advance the state of this powertrain system by the specified time step.
     virtual void Advance(double step) = 0;

@@ -56,11 +56,12 @@ class ChApi ChSystemDEM : public ChSystem {
     virtual ~ChSystemDEM() {}
 
     virtual ChMaterialSurfaceBase::ContactMethod GetContactMethod() const { return ChMaterialSurfaceBase::DEM; }
-    virtual ChBody* NewBody() { return new ChBody(ChMaterialSurfaceBase::DEM); }
+    virtual ChBody* NewBody() override { return new ChBody(ChMaterialSurfaceBase::DEM); }
+    virtual ChBodyAuxRef* NewBodyAuxRef() override { return new ChBodyAuxRef(ChMaterialSurfaceBase::DEM); }
 
     virtual void SetLcpSolverType(eCh_lcpSolver mval);
     // virtual void ChangeLcpSolverSpeed(ChLcpSolver* newsolver);
-    virtual void ChangeContactContainer(ChSharedPtr<ChContactContainerBase>  newcontainer);
+    virtual void ChangeContactContainer(std::shared_ptr<ChContactContainerBase>  newcontainer);
 
     bool UseMaterialProperties() const { return m_use_mat_props; }
     bool UseContactHistory() const { return m_use_history; }

@@ -239,6 +239,8 @@ class ChApiIrr ChIrrAppInterface {
     int videoframe_each;
     double symbolscale;
 
+    double camera_auto_rotate_speed;
+
     ChRealtimeStepTimer m_realtime_timer;
 
     irr::gui::IGUITabControl* gad_tabbed;
@@ -283,9 +285,9 @@ class ChApiIrr ChIrrAppInterface {
     irr::gui::IGUIStaticText* gad_textHelp;
 
   public:
-    ChSharedPtr<ChLinkSpring>* selectedspring;
-    ChSharedPtr<ChBody>* selectedtruss;
-    ChSharedPtr<ChBody>* selectedmover;
+    std::shared_ptr<ChLinkSpring>* selectedspring;
+    std::shared_ptr<ChBody>* selectedtruss;
+    std::shared_ptr<ChBody>* selectedmover;
     ChVector<> selectedpoint;
     double selecteddist;
 

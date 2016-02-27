@@ -21,7 +21,6 @@
 
 #include <vector>
 
-#include "chrono/core/ChShared.h"
 #include "chrono/physics/ChLinkLock.h"
 
 #include "chrono_vehicle/ChApiVehicle.h"
@@ -40,26 +39,26 @@ namespace vehicle {
 /// @{
 
 /// Base class for a brake subsystem
-class CH_VEHICLE_API ChBrake : public ChShared {
+class CH_VEHICLE_API ChBrake {
   public:
     ChBrake();
     virtual ~ChBrake() {}
 
     /// Initialize the brake by providing the wheel's revolute link.
-    virtual void Initialize(ChSharedPtr<ChLinkLockRevolute> hub) = 0;
+    virtual void Initialize(std::shared_ptr<ChLinkLockRevolute> hub) = 0;
 
     /// Update the brake subsystem: set the brake modulation.
     /// The input value is in the range [0,1].<br>
     ///   modulation = 0 indicates no braking<br>
     ///   modulation = 1 indicates that the subsystem should provide maximum braking torque
-    virtual void Update(double modulation) = 0;
+    virtual void Synchronize(double modulation) = 0;
 
     /// Get the current brake torque.
     virtual double GetBrakeTorque() = 0;
 };
 
 /// Vector of handles to brake subsystems.
-typedef std::vector<ChSharedPtr<ChBrake> > ChBrakeList;
+typedef std::vector<std::shared_ptr<ChBrake> > ChBrakeList;
 
 /// @} vehicle_wheeled_brake
 

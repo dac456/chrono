@@ -96,14 +96,10 @@ double rho_g = 1000;  // [kg/m^3] density of granules
 float mu_g = 0.5f;
 
 void CreateMechanismBodies(ChSystemParallel* system) {
-  ChSharedPtr<ChMaterialSurface> mat_walls(new ChMaterialSurface);
+  auto mat_walls = std::make_shared<ChMaterialSurface>();
   mat_walls->SetFriction(mu_walls);
 
-  ChSharedPtr<ChBody> container(new ChBody(
-#ifndef BULLET
-      new ChCollisionModelParallel
-#endif
-      ));
+  std::shared_ptr<ChBody> container(system->NewBody());
   container->SetMaterialSurface(mat_walls);
   container->SetIdentifier(Id_container);
   container->SetBodyFixed(true);
@@ -112,20 +108,16 @@ void CreateMechanismBodies(ChSystemParallel* system) {
 
   // Attach geometry of the containing bin
   container->GetCollisionModel()->ClearModel();
-  utils::AddBoxGeometry(container.get_ptr(), ChVector<>(hdimX, hdimY, hthick), ChVector<>(0, 0, -hthick));
-  utils::AddBoxGeometry(container.get_ptr(), ChVector<>(hthick, hdimY, hdimZ), ChVector<>(-hdimX - hthick, 0, hdimZ));
-  utils::AddBoxGeometry(container.get_ptr(), ChVector<>(hthick, hdimY, hdimZ), ChVector<>(hdimX + hthick, 0, hdimZ));
-  utils::AddBoxGeometry(container.get_ptr(), ChVector<>(hdimX, hthick, hdimZ), ChVector<>(0, -hdimY - hthick, hdimZ));
-  utils::AddBoxGeometry(container.get_ptr(), ChVector<>(hdimX, hthick, hdimZ), ChVector<>(0, hdimY + hthick, hdimZ));
+  utils::AddBoxGeometry(container.get(), ChVector<>(hdimX, hdimY, hthick), ChVector<>(0, 0, -hthick));
+  utils::AddBoxGeometry(container.get(), ChVector<>(hthick, hdimY, hdimZ), ChVector<>(-hdimX - hthick, 0, hdimZ));
+  utils::AddBoxGeometry(container.get(), ChVector<>(hthick, hdimY, hdimZ), ChVector<>(hdimX + hthick, 0, hdimZ));
+  utils::AddBoxGeometry(container.get(), ChVector<>(hdimX, hthick, hdimZ), ChVector<>(0, -hdimY - hthick, hdimZ));
+  utils::AddBoxGeometry(container.get(), ChVector<>(hdimX, hthick, hdimZ), ChVector<>(0, hdimY + hthick, hdimZ));
   container->GetCollisionModel()->BuildModel();
 
   system->AddBody(container);
 
-  ChSharedPtr<ChBody> ground(new ChBody(
-#ifndef BULLET
-      new ChCollisionModelParallel
-#endif
-      ));
+  std::shared_ptr<ChBody> ground(system->NewBody());
   ground->SetMaterialSurface(mat_walls);
   ground->SetIdentifier(Id_ground);
   ground->SetBodyFixed(true);
@@ -137,7 +129,7 @@ void CreateMechanismBodies(ChSystemParallel* system) {
 
 void CreateGranularMaterial(ChSystemParallel* sys) {
   // Common material
-  ChSharedPtr<ChMaterialSurface> ballMat(new ChMaterialSurface);
+  auto ballMat = std::make_shared<ChMaterialSurface>();
   ballMat->SetFriction(.5);
 
   // Create the falling balls
@@ -153,7 +145,7 @@ void CreateGranularMaterial(ChSystemParallel* sys) {
         ChVector<> rnd(rand() % 1000 / 100000.0, rand() % 1000 / 100000.0, rand() % 1000 / 100000.0);
         ChVector<> pos(0.4 * ix, 0.4 * iy, 0.4 * iz + 1);
 
-        ChSharedBodyPtr ball(new ChBody(new ChCollisionModelParallel));
+        std::shared_ptr<ChBody> ball(sys->NewBody());
         ball->SetMaterialSurface(ballMat);
 
         ball->SetIdentifier(ballId++);
@@ -165,7 +157,7 @@ void CreateGranularMaterial(ChSystemParallel* sys) {
         ball->SetCollide(true);
 
         ball->GetCollisionModel()->ClearModel();
-        utils::AddSphereGeometry(ball.get_ptr(), radius);
+        utils::AddSphereGeometry(ball.get(), radius);
         ball->GetCollisionModel()->BuildModel();
 
         sys->AddBody(ball);
@@ -173,6 +165,7 @@ void CreateGranularMaterial(ChSystemParallel* sys) {
     }
   }
 }
+
 // =============================================================================
 
 void SetupSystem(ChSystemParallelDVI* msystem) {
@@ -310,13 +303,13 @@ int main(int argc, char* argv[]) {
 
   ChSystemParallelDVI* msystem = new ChSystemParallelDVI();
 
-  SetupSystem(msystem);
-
 #ifdef BULLET
   msystem->ChangeCollisionSystem(COLLSYS_BULLET_PARALLEL);
 #else
   msystem->GetSettings()->collision.narrowphase_algorithm = NARROWPHASE_MPR;
 #endif
+
+  SetupSystem(msystem);
 
   // Initialize counters
   double time = 0;
@@ -335,7 +328,6 @@ int main(int argc, char* argv[]) {
     // Loop until reaching the end time...
     while (time < time_end) {
       if (gl_window.Active()) {
-        // gl_window.DoStepDynamics(time_step);
         gl_window.Render();
       }
       msystem->DoStepDynamics(time_step);
@@ -351,7 +343,7 @@ int main(int argc, char* argv[]) {
   } else {
     while (time < time_end) {
       msystem->DoStepDynamics(time_step);
-
+      CompareContacts(msystem);
       cout << "Time: " << time << endl;
       time += time_step;
     }

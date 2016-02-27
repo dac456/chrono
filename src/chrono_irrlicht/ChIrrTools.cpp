@@ -13,7 +13,7 @@
 #include "chrono/lcp/ChLcpIterativeSolver.h"
 #include "chrono/physics/ChContactContainerBase.h"
 #include "chrono/physics/ChLinkMate.h"
-
+#include "chrono/assets/ChColor.h"
 #include "chrono_irrlicht/ChIrrTools.h"
 
 namespace chrono {
@@ -233,8 +233,7 @@ int ChIrrTools::drawAllLinks(ChSystem& mphysicalSystem,
 
     ChSystem::IteratorPhysicsItems myiter = mphysicalSystem.IterBeginPhysicsItems();
     while (myiter.HasItem()) {
-        if ((*myiter).IsType<ChLinkBase>()) {
-            ChSharedPtr<ChLinkBase> mylink = (*myiter).DynamicCastTo<ChLinkBase>();
+        if (auto mylink = std::dynamic_pointer_cast<ChLinkBase>(*myiter)) {
             ChCoordsys<> mlinkframe = mylink->GetLinkAbsoluteCoords();
             ChVector<> v1abs = mlinkframe.pos;
             ChVector<> v2;
@@ -272,8 +271,7 @@ int ChIrrTools::drawAllLinkLabels(ChSystem& mphysicalSystem,
 
     ChSystem::IteratorPhysicsItems myiter = mphysicalSystem.IterBeginPhysicsItems();
     while (myiter.HasItem()) {
-        if ((*myiter).IsType<ChLinkBase>()) {
-            ChSharedPtr<ChLinkBase> mylink = (*myiter).DynamicCastTo<ChLinkBase>();
+        if (auto mylink = std::dynamic_pointer_cast<ChLinkBase>(*myiter)) {
             ChCoordsys<> mlinkframe = mylink->GetLinkAbsoluteCoords();  // GetAssetsFrame();
 
             char buffer[25];
@@ -329,10 +327,7 @@ int ChIrrTools::drawAllBoundingBoxes(ChSystem& mphysicalSystem, irr::video::IVid
 
     ChSystem::IteratorPhysicsItems myiter = mphysicalSystem.IterBeginPhysicsItems();
     while (myiter.HasItem()) {
-        if ((*myiter).IsType<ChBody>())  // item is inherited from ChBody?
-        {
-            ChSharedPtr<ChBody> abody((*myiter).DynamicCastTo<ChBody>());
-
+        if (auto abody = std::dynamic_pointer_cast<ChBody>(*myiter)) {
             irr::video::SColor mcol;
 
             if (abody->GetSleeping())
@@ -393,10 +388,7 @@ int ChIrrTools::drawAllCOGs(ChSystem& mphysicalSystem, irr::video::IVideoDriver*
 
     ChSystem::IteratorPhysicsItems myiter = mphysicalSystem.IterBeginPhysicsItems();
     while (myiter.HasItem()) {
-        if ((*myiter).IsType<ChBody>())  // item is inherited from ChBody?
-        {
-            ChSharedPtr<ChBody> abody((*myiter).DynamicCastTo<ChBody>());
-
+        if (auto abody = std::dynamic_pointer_cast<ChBody>(*myiter)) {
             irr::video::SColor mcol;
             const ChFrame<>& mframe_cog = abody->GetFrame_COG_to_abs();
             const ChFrame<>& mframe_ref = abody->GetFrame_REF_to_abs();
@@ -444,11 +436,9 @@ int ChIrrTools::drawAllLinkframes(ChSystem& mphysicalSystem, irr::video::IVideoD
 
     ChSystem::IteratorPhysicsItems myiter = mphysicalSystem.IterBeginPhysicsItems();
     while (myiter.HasItem()) {
-        if ((*myiter).IsType<ChLinkBase>()) {
+        if (auto mylinkbase = std::dynamic_pointer_cast<ChLinkBase>(*myiter)) {
             ChFrame<> frAabs;
             ChFrame<> frBabs;
-
-            ChSharedPtr<ChLinkBase> mylinkbase = ((*myiter).DynamicCastTo<ChLinkBase>());
 
             // default frame alignment:
 
@@ -457,15 +447,12 @@ int ChIrrTools::drawAllLinkframes(ChSystem& mphysicalSystem, irr::video::IVideoD
 
             // special cases:
 
-            if ((*myiter).IsType<ChLinkMarkers>()) {
-                ChSharedPtr<ChLinkMarkers> mylink((*myiter).DynamicCastTo<ChLinkMarkers>());
+            if (auto mylink = std::dynamic_pointer_cast<ChLinkMarkers>(*myiter)) {
                 frAabs = *mylink->GetMarker1() >> *mylink->GetBody1();
                 frBabs = *mylink->GetMarker2() >> *mylink->GetBody2();
             }
 
-            if ((*myiter).IsType<ChLinkMateGeneric>()) {
-                ChSharedPtr<ChLinkMateGeneric> mylink(
-                    (*myiter).DynamicCastTo<ChLinkMateGeneric>());
+            if (auto mylink = std::dynamic_pointer_cast<ChLinkMateGeneric>(*myiter)) {
                 frAabs = mylink->GetFrame1() >> *mylink->GetBody1();
                 frBabs = mylink->GetFrame2() >> *mylink->GetBody2();
             }
@@ -758,6 +745,51 @@ void ChIrrTools::drawGrid(irr::video::IVideoDriver* driver,
         drawSegment(driver, mpos.TransformLocalToParent(V1), mpos.TransformLocalToParent(V2), mcol, use_Zbuffer);
     }
 }
+
+
+/// Easy-to-use function to draw color map 2D legend
+void  ChIrrTools::drawColorbar(double vmin, double vmax,
+                             const std::string& label,
+                             IrrlichtDevice* mdevice,
+                             int mx,
+                             int my,
+                             int sx,
+                             int sy) {
+
+    irr::video::IVideoDriver* driver = mdevice->getVideoDriver();
+    
+    gui::IGUIFont* font = 0;
+    if (mdevice->getGUIEnvironment()) 
+        font = mdevice->getGUIEnvironment()->getSkin()->getFont();
+
+    int steps = 10;
+    double ystep=((double)sy/(double)steps);
+    for (int i=0; i<steps; ++i) {
+        double mv_up = vmax - (vmax-vmin)*((double)(i)/(double)steps);
+        double mv_dw = vmax - (vmax-vmin)*((double)(i+1)/(double)steps);
+        core::rect<s32> mrect(mx,    my+(s32)(i*ystep),  mx+sx, my+(s32)((i+1)*ystep) );
+        ChColor c_up = ChColor::ComputeFalseColor(mv_up, vmin, vmax, false);
+        ChColor c_dw = ChColor::ComputeFalseColor(mv_dw, vmin, vmax, false);
+        video::SColor col_up (255, 255*c_up.R, 255*c_up.G, 255*c_up.B);
+        video::SColor col_dw (255, 255*c_dw.R, 255*c_dw.G, 255*c_dw.B);
+        driver->draw2DRectangle(mrect, col_up,col_up, col_dw, col_dw);
+
+        if (font) {
+            char buffer[100];
+            sprintf(buffer, "%g", mv_up);
+            font->draw(irr::core::stringw(buffer).c_str(), 
+                       core::rect<s32>(mrect.UpperLeftCorner.X+sx+6, mrect.UpperLeftCorner.Y-5, mrect.LowerRightCorner.X+sx+6,  mrect.LowerRightCorner.Y-5),
+                       irr::video::SColor(255, 0, 0, 0));
+            driver->draw2DLine(irr::core::position2d<s32>(mrect.UpperLeftCorner.X+sx-4,   mrect.UpperLeftCorner.Y), 
+                               irr::core::position2d<s32>(mrect.UpperLeftCorner.X+sx,     mrect.UpperLeftCorner.Y),
+                                   irr::video::SColor(255, 100, 100, 100));
+        }
+    }
+    font->draw(irr::core::stringw(label.c_str()).c_str(), 
+               core::rect<s32>(mx,my+sy+5, mx+100,my+sy+20),
+                       irr::video::SColor(255, 0, 0, 0));
+}
+
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

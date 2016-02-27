@@ -44,7 +44,7 @@ class CH_VEHICLE_API ChLugreTire : public ChTire {
     void Initialize();
 
     /// Initialize this tire system and enable visualization of the discs.
-    void Initialize(ChSharedPtr<ChBody> wheel  ///< handle to the associated wheel body
+    void Initialize(std::shared_ptr<ChBody> wheel  ///< handle to the associated wheel body
                     );
 
     /// Get the tire force and moment.
@@ -56,10 +56,10 @@ class CH_VEHICLE_API ChLugreTire : public ChTire {
 
     /// Update the state of this tire system at the current time.
     /// The tire system is provided the current state of its associated wheel.
-    virtual void Update(double time,                      ///< [in] current time
-                        const WheelState& wheel_state,  ///< [in] current state of associated wheel body
-                        const ChTerrain& terrain          ///< [in] reference to the terrain system
-                        ) override;
+    virtual void Synchronize(double time,                    ///< [in] current time
+                             const WheelState& wheel_state,  ///< [in] current state of associated wheel body
+                             const ChTerrain& terrain        ///< [in] reference to the terrain system
+                             ) override;
 
     /// Advance the state of this tire by the specified time step.
     virtual void Advance(double step) override;

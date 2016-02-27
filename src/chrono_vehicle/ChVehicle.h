@@ -46,7 +46,7 @@ namespace vehicle {
 /// Base class for chrono vehicle systems.
 /// The reference frame for a vehicle follows the ISO standard: Z-axis up, X-axis
 /// pointing forward, and Y-axis towards the left of the vehicle.
-class CH_VEHICLE_API ChVehicle : public ChShared {
+class CH_VEHICLE_API ChVehicle {
   public:
     /// Construct a vehicle system with a default ChSystem.
     ChVehicle(ChMaterialSurfaceBase::ContactMethod contact_method = ChMaterialSurfaceBase::DVI);
@@ -64,7 +64,7 @@ class CH_VEHICLE_API ChVehicle : public ChShared {
     double GetChTime() const { return m_system->GetChTime(); }
 
     /// Get a handle to the vehicle's chassis body.
-    ChSharedPtr<ChBodyAuxRef> GetChassis() const { return m_chassis; }
+    std::shared_ptr<ChBodyAuxRef> GetChassis() const { return m_chassis; }
 
     /// Get the global location of the chassis reference frame origin.
     const ChVector<>& GetChassisPos() const { return m_chassis->GetFrame_REF_to_abs().GetPos(); }
@@ -82,6 +82,10 @@ class CH_VEHICLE_API ChVehicle : public ChShared {
     /// rotation with respect to the global reference frame.
     const ChQuaternion<>& GetChassisRotCOM() const { return m_chassis->GetRot(); }
 
+    /// Get the vehicle total mass.
+    /// This includes the mass of the chassis and all vehicle subsystems.
+    virtual double GetVehicleMass() const = 0;
+
     /// Get the vehicle speed.
     /// Return the speed measured at the origin of the chassis reference frame.
     double GetVehicleSpeed() const { return m_chassis->GetFrame_REF_to_abs().GetPos_dt().Length(); }
@@ -96,7 +100,7 @@ class CH_VEHICLE_API ChVehicle : public ChShared {
     ChVector<> GetVehicleAcceleration(const ChVector<>& locpos) const;
 
     /// Get a handle to the vehicle's driveshaft body.
-    virtual ChSharedPtr<ChShaft> GetDriveshaft() const = 0;
+    virtual std::shared_ptr<ChShaft> GetDriveshaft() const = 0;
 
     /// Get the angular speed of the driveshaft.
     /// This function provides the interface between a vehicle system and a
@@ -130,7 +134,7 @@ class CH_VEHICLE_API ChVehicle : public ChShared {
     ChSystem* m_system;  ///< pointer to the Chrono system
     bool m_ownsSystem;   ///< true if system created at construction
 
-    ChSharedPtr<ChBodyAuxRef> m_chassis;  ///< handle to the chassis body
+    std::shared_ptr<ChBodyAuxRef> m_chassis;  ///< handle to the chassis body
 
     double m_stepsize;  ///< integration step-size for the vehicle system
 };

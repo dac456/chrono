@@ -22,7 +22,6 @@
 #ifndef CH_TIRE_H
 #define CH_TIRE_H
 
-#include "chrono/core/ChShared.h"
 #include "chrono/core/ChVector.h"
 #include "chrono/core/ChQuaternion.h"
 #include "chrono/core/ChCoordsys.h"
@@ -48,7 +47,7 @@ namespace vehicle {
 /// A tire subsystem is a force element. It is passed position and velocity
 /// information of the wheel body and it produces ground reaction forces and
 /// moments to be applied to the wheel body.
-class CH_VEHICLE_API ChTire : public ChShared {
+class CH_VEHICLE_API ChTire {
   public:
     ChTire(const std::string& name  ///< [in] name of this tire system
            );
@@ -63,10 +62,10 @@ class CH_VEHICLE_API ChTire : public ChShared {
     /// Update the state of this tire system at the current time.
     /// The tire system is provided the current state of its associated wheel and
     /// a handle to the terrain system.
-    virtual void Update(double time,                      ///< [in] current time
-                        const WheelState& wheel_state,  ///< [in] current state of associated wheel body
-                        const ChTerrain& terrain          ///< [in] reference to the terrain system
-                        ) {}
+    virtual void Synchronize(double time,                    ///< [in] current time
+                             const WheelState& wheel_state,  ///< [in] current state of associated wheel body
+                             const ChTerrain& terrain        ///< [in] reference to the terrain system
+                             ) {}
 
     /// Advance the state of this tire by the specified time step.
     virtual void Advance(double step) {}
