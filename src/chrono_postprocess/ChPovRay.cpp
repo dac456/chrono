@@ -39,6 +39,9 @@ using namespace chrono;
 using namespace postprocess;
 using namespace geometry;
 
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+
 ChPovRay::ChPovRay(ChSystem* system) : ChPostProcessBase(system) {
     this->pic_filename = "pic";
     this->template_filename = GetChronoDataFile("_template_POV.pov");
@@ -250,8 +253,9 @@ void ChPovRay::SetShowContacts(bool show,
     }
 }
 
-void ChPovRay::ExportScript(const std::string& filename) {
+void ChPovRay::ExportScript(const std::string& path, const std::string& filename) {
     this->out_script_filename = filename;
+    std::string fullPath = path + filename;
 
     pov_assets.clear();
 
@@ -261,8 +265,9 @@ void ChPovRay::ExportScript(const std::string& filename) {
     // appending assets as they enter the exporter, only once if shared, using ExportAssets() )
 
     std::string assets_filename = filename + ".assets";
+    std::string assets_fullpath = path + assets_filename;
     {
-        ChStreamOutAsciiFile assets_file(assets_filename.c_str());
+        ChStreamOutAsciiFile assets_file(assets_fullpath.c_str());
         assets_file << "// File containing meshes and objects for rendering POV scenes.\n";
         assets_file << "// This file is automatically included by " << filename.c_str() << ".pov , \n";
         assets_file << "// and you should not modify it.\n\n";
@@ -270,8 +275,9 @@ void ChPovRay::ExportScript(const std::string& filename) {
 
     // Generate the .INI script
     std::string ini_filename = filename + ".ini";
+    std::string ini_fullpath = path + ini_filename;
 
-    ChStreamOutAsciiFile ini_file(ini_filename.c_str());
+    ChStreamOutAsciiFile ini_file(ini_fullpath.c_str());
 
     ini_file << "; Script for rendering an animation with POV-Ray. \n";
     ini_file << "; Generated autumatically by Chrono::Engine. \n\n";
@@ -283,7 +289,7 @@ void ChPovRay::ExportScript(const std::string& filename) {
     ini_file << "Antialias_Depth=" << this->antialias_depth << " \n";
     ini_file << "Height=" << this->picture_height << " \n";
     ini_file << "Width =" << this->picture_width << " \n";
-    ini_file << "Input_File_Name=" << out_script_filename << "\n";
+    ini_file << "Input_File_Name=" << this->out_script_filename << "\n";
     ini_file << "Output_File_Name=" << pic_filename << "\n";
     ini_file << "Initial_Frame=0000 \n";
     ini_file << "Final_Frame=0999 \n";
@@ -293,7 +299,7 @@ void ChPovRay::ExportScript(const std::string& filename) {
 
     // Generate the .POV script:
 
-    ChStreamOutAsciiFile mfile(filename.c_str());
+    ChStreamOutAsciiFile mfile(fullPath.c_str());
 
     // Rough way to load the template head file in the string buffer
     if (template_filename != "") {
@@ -426,7 +432,7 @@ void ChPovRay::ExportScript(const std::string& filename) {
     }
 
     // Populate the assets
-    this->ExportAssets();
+    this->ExportAssets(path);
 }
 
 void ChPovRay::_recurseExportAssets(std::vector<std::shared_ptr<ChAsset> >& assetlist, ChStreamOutAsciiFile& assets_file) {
@@ -677,9 +683,9 @@ void ChPovRay::_recurseExportAssets(std::vector<std::shared_ptr<ChAsset> >& asse
     }  // end loop on assets of i-th object
 }
 
-void ChPovRay::ExportAssets() {
+void ChPovRay::ExportAssets(const std::string& path) {
     // open asset file in append mode.
-    std::string assets_filename = this->out_script_filename + ".assets";
+    std::string assets_filename = path + this->out_script_filename + ".assets";
     ChStreamOutAsciiFile assets_file(assets_filename.c_str(), std::ios::app);
 
     // This will scan all the ChPhysicsItem added objects, and if
@@ -760,7 +766,7 @@ void ChPovRay::_recurseExportObjData(std::vector<std::shared_ptr<ChAsset> >& ass
     mfilepov << "}\n";  // end union
 }
 
-void ChPovRay::ExportData(const std::string& filename) {
+void ChPovRay::ExportData(const std::string& path, const std::string& filename) {
     // Regenerate the list of objects that need POV rendering, by
     // scanning all ChPhysicsItems in the ChSystem that have a ChPovRayAsse attached.
     // Note that SetupLists() happens at each ExportData (i.e. at each timestep)
@@ -773,18 +779,25 @@ void ChPovRay::ExportData(const std::string& filename) {
     // the initial call to ExportScript() - but note that already present
     // assets won't be appended!)
 
-    this->ExportAssets();
+    this->ExportAssets(path);
 
     // Generate the nnnn.dat and nnnn.pov files:
 
+    std::string fullPath = path + filename;
     try {
         char pathdat[200];
-        sprintf(pathdat, "%s.dat", filename.c_str());
-        ChStreamOutAsciiFile mfiledat(pathdat);
+        sprintf(pathdat, "%s%05d.dat", filename.c_str(), this->framenumber);
+
+        std::stringstream fullDatPath;
+        fullDatPath << path << filename << std::setfill('0') << std::setw(5) << this->framenumber << + ".dat";
+        ChStreamOutAsciiFile mfiledat(fullDatPath.str().c_str());
 
         char pathpov[200];
         sprintf(pathpov, "%s.pov", filename.c_str());
-        ChStreamOutAsciiFile mfilepov(pathpov);
+
+        std::stringstream fullPovPath;
+        fullPovPath << path << filename << std::setfill('0') << std::setw(5) << this->framenumber << + ".pov";
+        ChStreamOutAsciiFile mfilepov(fullPovPath.str().c_str());
 
         this->camera_found_in_assets = false;
 
