@@ -1,10 +1,11 @@
 Introduction {#introduction_root}
 ==========================
 
--   @subpage introduction_chrono
+-   Chrono FAQ: @subpage faq_root
 
-    An overview of the functionality in Chrono
+-   High level overview of Chrono: @subpage introduction_chrono
 
--   @subpage introduction_chrono_pyengine
 
-    An overview of the Chrono::PyEngine library
+-   Overview of [Chrono::PyEngine](@ref introduction_chrono_pyengine)
+
+-   Overview of [Chrono::SolidWorks](@ref introduction_chrono_solidworks)

@@ -1,43 +1,74 @@
 Tutorials {#tutorial_root}
 ==========================
 
-The following links describe a set of basic Chrono tutorials for the different modules part of Project Chrono. All the source code mentioned here is provided as part of the Chrono regular releases, so check before you start copy & pasting the code. The list of tutorials below is automatically generated from our GIT repository.
 
-As always, we would be happy to hear your comments and receive your contributions on any tutorial.
+-   @subpage tutorial_table_of_content_install 
 
--   @subpage tutorial_table_of_content_install
-
-    You will learn how to setup Chrono on your computer!
+    How to set up Chrono and build Chrono projects on your machine. **Suggested reading**
 
 -   @subpage tutorial_table_of_content_chrono
 
-    Here you will learn about the core of the chrono library
+    Examples about the core functionalities of the Chrono library. **Suggested reading**
+	
+-   @subpage tutorial_table_of_content_chrono_irrlicht
+
+    Examples with 3D interactive view, using Irrlicht. **Suggested reading**
+	
+	
+## Optional modules
+
+-   @subpage tutorial_table_of_content_chrono_postprocessing
+
+    Examples about postprocessing (ex. POVray or GNUplot output).
 
 -   @subpage tutorial_table_of_content_chrono_fea
 
-    Here you will learn about the chrono fea library
+    Basic information about FEA support in Chrono
 
 -   @subpage tutorial_table_of_content_chrono_vehicle
-
-    Here you will learn about the chrono vehicle library
-
-Other Guides
------------------
-
--   @subpage tutorial_git
-
-When you want to develop a program based on Chrono::Engine, there are
-different alternatives:
-
--   @subpage tutorial_cmake
-
-This is approach that we suggest when you want to develop serious projects
-
--   @subpage advanced_build
+ 
+    Learn how to set up vehicle models in Chrono
 	
- This section is for people that need to integrate Chrono::Engine in a project where they are already using other build systems. It contains low-level details on build flags, library paths etc.
+-   @subpage tutorial_table_of_content_chrono_cosimulation
 
- In all cases, the build process requires that you
-	-   include the .h headers of Chrono::Engine,
-	-   link the .lib libraries of Chrono::Engine,
-	-   build your .exe
+    Examples about cosimulation with Simulink. 
+
+-   @subpage tutorial_table_of_content_chrono_cascade
+
+    Examples about loading CAD models 
+	
+-   @subpage tutorial_table_of_content_chrono_matlab
+
+    Examples about Matlab inter-operation 
+	
+-   @subpage tutorial_table_of_content_chrono_parallel
+
+    Examples about the parallel unit.
+	
+-   @subpage tutorial_table_of_content_chrono_opengl
+
+    Examples about the OpenGL unit.
+	
+-   @subpage tutorial_table_of_content_chrono_python
+
+    Examples about how to parse Python programs.
+
+	
+## Other tools
+
+-   @subpage tutorial_table_of_content_chrono_solidworks
+
+    Learn how to use [Chrono::SolidWorks](@ref introduction_chrono_solidworks)
+
+-   @subpage tutorial_table_of_content_chrono_pyengine
+ 
+    Learn how to use [Chrono::PyEngine](@ref introduction_chrono_pyengine)
+
+
+	
+## Documentation guides
+
+-    @subpage tutorial_table_of_content_documentation
+
+     Learn how to write technical documentation for Chrono if you are developing new modules/features.
+

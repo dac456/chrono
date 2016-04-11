@@ -109,10 +109,10 @@ void ChContactSurfaceMesh::AddFacesFromBoundary(double sphere_swept) {
             std::shared_ptr<ChNodeFEAxyz> nB = mshell->GetNodeB();
             std::shared_ptr<ChNodeFEAxyz> nC = mshell->GetNodeC();
             std::shared_ptr<ChNodeFEAxyz> nD = mshell->GetNodeD();
-            std::array<ChNodeFEAxyz*,3> tri1 = {nA.get(),nB.get(),nC.get()};
-            std::array<ChNodeFEAxyz*,3> tri2 = {nB.get(),nC.get(),nD.get()};
-            std::array<std::shared_ptr<ChNodeFEAxyz>,3> tri1_ptrs = {nA,nB,nC};
-            std::array<std::shared_ptr<ChNodeFEAxyz>,3> tri2_ptrs = {nB,nC,nD};
+            std::array<ChNodeFEAxyz*, 3> tri1 = { nA.get(), nD.get(), nB.get() };
+            std::array<ChNodeFEAxyz*, 3> tri2 = { nB.get(), nD.get(), nC.get() };
+            std::array<std::shared_ptr<ChNodeFEAxyz>, 3> tri1_ptrs = { nA, nD, nB };
+            std::array<std::shared_ptr<ChNodeFEAxyz>, 3> tri2_ptrs = { nB, nD, nC };
             triangles.push_back( tri1 );
             triangles.push_back( tri2 );
             triangles_ptrs.push_back( tri1_ptrs );
@@ -346,6 +346,27 @@ void ChContactSurfaceMesh::AddFacesFromBoundary(double sphere_swept) {
         wingedgeC->second.first = -1;
     }
 
+}
+
+unsigned int ChContactSurfaceMesh::GetNumVertices() const {
+    std::map<ChNodeFEAxyz*, size_t> ptr_ind_map;
+    size_t count = 0;
+    for (size_t i = 0; i < vfaces.size(); ++i) {
+        if (!ptr_ind_map.count(vfaces[i]->GetNode1().get())) {
+            ptr_ind_map.insert({vfaces[i]->GetNode1().get(), count});
+            count++;
+        }
+        if (!ptr_ind_map.count(vfaces[i]->GetNode2().get())) {
+            ptr_ind_map.insert({vfaces[i]->GetNode2().get(), count});
+            count++;
+        }
+        if (!ptr_ind_map.count(vfaces[i]->GetNode3().get())) {
+            ptr_ind_map.insert({vfaces[i]->GetNode3().get(), count});
+            count++;
+        }
+    }
+
+    return (unsigned int)count;
 }
 
 void ChContactSurfaceMesh::SurfaceSyncCollisionModels() {
