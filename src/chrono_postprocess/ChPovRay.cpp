@@ -241,8 +241,9 @@ void ChPovRay::SetShowContacts(bool show,
     }
 }
 
-void ChPovRay::ExportScript(const std::string& filename) {
+void ChPovRay::ExportScript(const std::string prefix, const std::string& filename) {
     this->out_script_filename = filename;
+    std::string full_path = prefix + filename;
 
     pov_assets.clear();
 
@@ -253,7 +254,7 @@ void ChPovRay::ExportScript(const std::string& filename) {
 
     std::string assets_filename = filename + ".assets";
     {
-        ChStreamOutAsciiFile assets_file(assets_filename.c_str());
+        ChStreamOutAsciiFile assets_file(std::string(prefix + assets_filename).c_str());
         assets_file << "// File containing meshes and objects for rendering POV scenes.\n";
         assets_file << "// This file is automatically included by " << filename.c_str() << ".pov , \n";
         assets_file << "// and you should not modify it.\n\n";
@@ -262,7 +263,7 @@ void ChPovRay::ExportScript(const std::string& filename) {
     // Generate the .INI script
     std::string ini_filename = filename + ".ini";
 
-    ChStreamOutAsciiFile ini_file(ini_filename.c_str());
+    ChStreamOutAsciiFile ini_file(std::string(prefix + ini_filename).c_str());
 
     ini_file << "; Script for rendering an animation with POV-Ray. \n";
     ini_file << "; Generated autumatically by Chrono::Engine. \n\n";
@@ -284,7 +285,7 @@ void ChPovRay::ExportScript(const std::string& filename) {
 
     // Generate the .POV script:
 
-    ChStreamOutAsciiFile mfile(filename.c_str());
+    ChStreamOutAsciiFile mfile(full_path.c_str());
 
     // Rough way to load the template head file in the string buffer
     if (template_filename != "") {
@@ -417,7 +418,7 @@ void ChPovRay::ExportScript(const std::string& filename) {
     }
 
     // Populate the assets
-    this->ExportAssets();
+    this->ExportAssets(prefix);
 }
 
 void ChPovRay::_recurseExportAssets(std::vector<std::shared_ptr<ChAsset> >& assetlist, ChStreamOutAsciiFile& assets_file) {
@@ -668,9 +669,9 @@ void ChPovRay::_recurseExportAssets(std::vector<std::shared_ptr<ChAsset> >& asse
     }  // end loop on assets of i-th object
 }
 
-void ChPovRay::ExportAssets() {
+void ChPovRay::ExportAssets(const std::string prefix) {
     // open asset file in append mode.
-    std::string assets_filename = this->out_script_filename + ".assets";
+    std::string assets_filename = prefix + this->out_script_filename + ".assets";
     ChStreamOutAsciiFile assets_file(assets_filename.c_str(), std::ios::app);
 
     // This will scan all the ChPhysicsItem added objects, and if
@@ -751,7 +752,7 @@ void ChPovRay::_recurseExportObjData(std::vector<std::shared_ptr<ChAsset> >& ass
     mfilepov << "}\n";  // end union
 }
 
-void ChPovRay::ExportData(const std::string& filename) {
+void ChPovRay::ExportData(const std::string prefix, const std::string& filename) {
     // Regenerate the list of objects that need POV rendering, by
     // scanning all ChPhysicsItems in the ChSystem that have a ChPovRayAsse attached.
     // Note that SetupLists() happens at each ExportData (i.e. at each timestep)
@@ -764,18 +765,23 @@ void ChPovRay::ExportData(const std::string& filename) {
     // the initial call to ExportScript() - but note that already present
     // assets won't be appended!)
 
-    this->ExportAssets();
+    this->ExportAssets(prefix);
 
     // Generate the nnnn.dat and nnnn.pov files:
 
     try {
+        std::string full_path = prefix + filename;
+
         char pathdat[200];
-        sprintf(pathdat, "%s.dat", filename.c_str());
+        sprintf(pathdat, "%s.dat", full_path.c_str());
         ChStreamOutAsciiFile mfiledat(pathdat);
 
         char pathpov[200];
-        sprintf(pathpov, "%s.pov", filename.c_str());
+        sprintf(pathpov, "%s.pov", full_path.c_str());
         ChStreamOutAsciiFile mfilepov(pathpov);
+
+        char decldat[200];
+        sprintf(decldat, "%s.dat", filename.c_str());
 
         this->camera_found_in_assets = false;
 
@@ -789,9 +795,8 @@ void ChPovRay::ExportData(const std::string& filename) {
         // Tell POV to open the .dat file, that could be used by
         // ChParticleClones for efficiency (xyz raw data with center of particles will
         // be saved in dat and load using a #while POV loop, helping to reduce size of .pov file)
-        mfilepov << "#declare dat_file = \"" << pathdat << "\"\n";
+        mfilepov << "#declare dat_file = \"" << decldat << "\"\n";
         mfilepov << "#fopen MyDatFile dat_file read \n\n";
-
         // Save time-dependent data for the geometry of objects in ...nnnn.POV
         // and in ...nnnn.DAT file
 

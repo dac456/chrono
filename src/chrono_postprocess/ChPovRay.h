@@ -183,9 +183,9 @@ class ChApiPostProcess ChPovRay : public ChPostProcessBase {
     /// It contains the definition of geometric shapes, lights
     /// and so on, and a POV function that moves meshes in the
     /// position specified by data files saved at each step.
-    virtual void ExportScript() { this->ExportScript(this->out_script_filename); }
+    virtual void ExportScript() { this->ExportScript("", this->out_script_filename); }
     /// As ExportScript(), but overrides the filename.
-    virtual void ExportScript(const std::string& filename);
+    virtual void ExportScript(const std::string prefix, const std::string& filename);
 
     /// This function is used at each timestep to export data
     /// formatted in a way that it can be load with the POV
@@ -197,17 +197,17 @@ class ChApiPostProcess ChPovRay : public ChPostProcessBase {
     ///  state0001.dat, state0002.dat,
     /// The user should call this function in the while() loop
     /// of the simulation, once per frame.
-    virtual void ExportData() {
+    virtual void ExportData(const std::string prefix) {
         char fullpath[200];
         sprintf(fullpath, "%s%05d", this->out_data_filename.c_str(), this->framenumber);
-        this->ExportData(std::string(fullpath));
+        this->ExportData(prefix, std::string(fullpath));
     }
     /// As ExportScript(), but overrides the automatically computed filename.
-    virtual void ExportData(const std::string& filename);
+    virtual void ExportData(const std::string prefix, const std::string& filename);
 
   protected:
     virtual void SetupLists();
-    virtual void ExportAssets();
+    virtual void ExportAssets(const std::string assets);
     void _recurseExportAssets(std::vector<std::shared_ptr<ChAsset> >& assetlist, ChStreamOutAsciiFile& assets_file);
 
     void _recurseExportObjData(std::vector<std::shared_ptr<ChAsset> >& assetlist,
