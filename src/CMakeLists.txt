@@ -90,7 +90,7 @@ if(ENABLE_OPENMP)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set(CH_CXX_FLAGS "${CH_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   set(CH_C_FLAGS "${CH_C_FLAGS} ${OpenMP_C_FLAGS}")
-  
+
 else()
 	# As an alternative, if TBB is located the Parallel module will use it for all thrust calls
 	find_package("TBB")
@@ -114,7 +114,7 @@ if(SSE_FOUND)
 else()
   message("  No SSE support")
 endif()
-  
+
 # Figure out AVX level support
 message(STATUS "Searching for AVX...")
 find_package(AVX)
@@ -157,7 +157,7 @@ if(FMA_FOUND)
 	set(CHRONO_HAS_FMA "#define CHRONO_HAS_FMA")
 else()
   message("  No FMA support")
-endif()  
+endif()
 
 #-----------------------------------------------------------------------------
 # MPI support
@@ -230,7 +230,7 @@ include_directories(${PROJECT_BINARY_DIR})
 # Propagates the CMake build to other directories
 #------------------------------------------------------------
 
-# Add directory for main ChronoEngine library 
+# Add directory for main ChronoEngine library
 add_subdirectory(chrono)
 
 # Let all modules have access to the headers of the main library
@@ -381,7 +381,7 @@ install(FILES "${PROJECT_BINARY_DIR}/chrono/ChConfig.h"
         DESTINATION include/chrono)
 
 #-----------------------------------------------------------------------------
-# Generate and install the versioning header file 
+# Generate and install the versioning header file
 #-----------------------------------------------------------------------------
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/chrono/ChVersion.h.in"
